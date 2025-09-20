@@ -1,206 +1,138 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Loja Express</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #fff8e7; margin: 0; padding: 0; }
-    header { background: #ffcc00; color: #4b0082; padding: 1rem; text-align: center; font-size: 1.5rem; font-weight: bold; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loja Express</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#fff8e7; margin:0; padding:0; }
+  header { background:#ffcc00; color:#4b0082; text-align:center; padding:10px; font-weight:bold; font-size:20px; }
 
-    /* PRODUTOS */
-    .produtos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; padding: 0.8rem; }
-    .produto {
-      background: #fff; border: 2px solid #4b0082; border-radius: 10px; padding: 0.8rem; display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start;
-    }
-    .produto img { width: 140px; height: 140px; object-fit: contain; margin-right: 10px; }
-    .produto-info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-    .produto h3 { margin: 0 0 5px 0; color: #4b0082; font-size: 1rem; }
-    .produto p { font-size: 0.9rem; color: #222; margin: 0 0 5px 0; font-style: italic; }
-    .produto button { background: #4b0082; color: #fff; border: none; padding: 0.5rem 0.8rem; border-radius: 5px; cursor: pointer; font-size: 0.9rem; width: fit-content; }
-    .produto button:hover { background: #36005d; }
+  #produtosContainer { display: table; width: 100%; border-collapse: collapse; }
+  .produto { display: table-row; border:2px solid #4b0082; margin-bottom:5px; background:#fff; }
+  .produto div { display: table-cell; vertical-align: top; padding:5px; }
+  .produto img { width:100px; height:100px; }
+  .produto h3 { color:#4b0082; margin:0 0 5px 0; }
+  .produto p { margin:0 0 5px 0; font-size:12px; }
 
-    /* CARRINHO */
-    #carrinho { background: #eee; padding: 1rem; border-top: 3px solid #4b0082; margin-top: 0.5rem; }
-    #itensCarrinho { list-style: none; padding: 0; margin: 0; }
-    #itensCarrinho li { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 0.4rem 0.5rem; margin: 0.2rem 0; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; }
-    .remover { background: red; color: #fff; border: none; border-radius: 5px; padding: 0.2rem 0.5rem; cursor: pointer; font-size: 0.8rem; }
-    #finalizar { margin-top: 0.8rem; background: #ffcc00; color: #4b0082; border: none; padding: 0.6rem 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1rem; }
+  .produto button { background:#4b0082; color:#fff; border:none; padding:5px; cursor:pointer; }
 
-    /* PAGAMENTO */
-    #pagamento { display: none; padding: 1rem; background: #f7e7ff; border-top: 3px solid #4b0082; margin-top: 0.5rem; text-align: center; border-radius: 10px; }
-    #pagamento h2 { margin-bottom: 1rem; color: #4b0082; }
-    #pixInfo { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size: 1rem; }
-    #pixKey { border: 2px solid #4b0082; padding: 6px 10px; border-radius: 6px; font-weight: 600; background: #fff; }
-    #pixPanel button { padding: 0.5rem 1rem; border-radius: 6px; border: none; background: #4b0082; color: #fff; cursor: pointer; transition: all 0.3s ease; }
-    #pixPanel button:hover { background: #36005d; transform: scale(1.05); }
-    #qrCodePlaceholder img { width: 150px; height: 150px; border-radius: 10px; margin: 0.5rem 0; }
-    .resumo { margin-top: 1rem; background: #fff; padding: 0.8rem; border-radius: 8px; border: 1px solid #ccc; text-align: left; }
+  #carrinho { background:#eee; padding:10px; margin:5px; border-top:3px solid #4b0082; }
+  #itensCarrinho { list-style:none; padding:0; margin:0; }
+  #itensCarrinho li { padding:5px; margin:2px 0; background:#fff; border:1px solid #ccc; }
+  .remover { background:red; color:#fff; border:none; padding:2px 5px; cursor:pointer; }
+  #finalizar { background:#ffcc00; color:#4b0082; border:none; padding:10px; width:100%; cursor:pointer; }
 
-    /* BOTÃO JÁ PAGUEI */
-    #pagamento button.confirmar {
-      margin-top: 1rem;
-      background: #28a745;
-      color: #fff;
-      font-size: 1.1rem;
-      font-weight: bold;
-      padding: 0.7rem 1.2rem;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.3s ease;
-    }
-    #pagamento button.confirmar:hover {
-      background: #218838;
-      transform: scale(1.05);
-    }
-
-    /* RESPONSIVIDADE */
-    @media (max-width: 600px) {
-      .produtos { grid-template-columns: 1fr; gap: 0.5rem; padding: 0.5rem; }
-      .produto { flex-direction: column; align-items: center; }
-      .produto img { margin-right: 0; margin-bottom: 5px; }
-      .produto-info { align-items: center; text-align: center; }
-    }
-  </style>
+  #pagamento { display:none; background:#f7e7ff; padding:10px; margin:5px; border-top:3px solid #4b0082; }
+</style>
 </head>
 <body>
-  <header>🛒 Loja Express</header>
 
-  <section class="produtos" id="listaProdutos"></section>
+<header>🛒 Loja Express</header>
 
-  <section id="carrinho">
-    <h2>🛒 Carrinho</h2>
-    <ul id="itensCarrinho"></ul>
-    <p><strong>Total: R$ <span id="total">0.00</span></strong></p>
-    <button id="finalizar">Finalizar Compra</button>
-  </section>
+<div id="produtosContainer"></div>
 
-  <section id="pagamento">
-    <h2>💳 Pagamento via Pix</h2>
+<div id="carrinho">
+  <h3>🛒 Carrinho</h3>
+  <ul id="itensCarrinho"></ul>
+  <p>Total: R$ <span id="total">0.00</span></p>
+  <button id="finalizar">Finalizar Compra</button>
+  <audio id="somPagamento" src="img-loja/Ring1.mp3"></audio>
+</div>
 
-    <div id="pixContainer" style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 10px;">
-      <div id="qrCodePlaceholder" style="text-align: center;">
-        <img src="img-loja/QRcode.jpg" alt="QR Code Pix">
-        <p><strong>Destinatário:</strong> Eduarda Luiza da Silva | <strong>Instituição:</strong> BCO SANTANDER (BRASIL) S.A.</p>
-      </div>
+<div id="pagamento">
+  <h3>💳 Pagamento Pix</h3>
+  <img src="img-loja/QRcode.jpg" width="150" height="150">
+  <p>Destinatário: Eduarda Luiza da Silva | Instituição: BCO SANTANDER (BRASIL) S.A.</p>
+  <p>Chave Pix (e-mail): <span id="pixKey">Eluiza67042@gmail.com</span></p>
+  <button onclick="copyPix()">📋 Copiar Pix</button>
+  <button onclick="confirmPayment()">✅ Já paguei</button>
+  <audio id="somPagamento" src="img-loja/Ring1.mp3"></audio>
+</div>
 
-      <div id="pixInfo" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-        <span id="pixKey">(11) 97042-4524</span>
-        <button onclick="copyPix()">📋 Copiar</button>
-      </div>
-    </div>
+<script>
+var produtos = [
+  {nome:"Cabo carregador", preco:15, desc:"Cabo de carregador disponível nos modelos: Tipo C e Lightning (iPhone). Uma ponta USB, outra ponta carregador. Não acompanha fonte."},
+  {nome:"Fone de Ouvido Bluetooth", preco:20, desc:"Fone de ouvido sem fio com cancelamento de ruído e microfone intra-auricular. Autonomia de até 4 horas. Acompanha par de fones, caixa de carregamento e cabo USB."},
+  {nome:"Guarda-Chuva", preco:35, desc:"Guarda-chuva compacto e reforçado, cabe em sua bolsa. (cores conforme disponibilidade)"},
+  {nome:"Power Bank (Carregador portátil)", preco:40, desc:"Carregador portátil Power Bank 10000mah com 3 saídas: Tipo C, Lightning (iPhone) e V8 (micro USB)."},
+  {nome:"Kit Fonte + Cabo Carregador", preco:25, desc:"Kit Carregador completo 1.2A, incluso fonte + cabo de carregamento. Disponível para Tipo C e Lightning (iPhone)."},
+  {nome:"Cabo carregador USB 3 em 1", preco:20, desc:"Cabo 3 em 1 com conectores: Tipo-C, Lightning (iPhone) e Micro USB (V8). Permite carregar diversos dispositivos com um único cabo."},
+  {nome:"Fone com microfone", preco:10, desc:"Fone com fio e microfone, entrada P2."}
+];
 
-    <div class="resumo">
-      <h3>Resumo da Compra</h3>
-      <p><strong>Total a pagar:</strong> R$ <span id="resumoTotal">0.00</span></p>
-      <p>Após realizar o pagamento via Pix, clique em <strong>“Já paguei”</strong> para confirmar sua compra.</p>
-    </div>
+var cart = {};
+var container = document.getElementById('produtosContainer');
 
-    <button class="confirmar" onclick="confirmPayment()">✅ Já paguei</button>
-  </section>
+for(var i=0;i<produtos.length;i++){
+  var p = produtos[i];
+  var div = document.createElement('div');
+  div.className='produto';
+  div.innerHTML = '<div><img src="img-loja/Foto'+(i+1)+'.jpg"></div>'+
+                  '<div><h3>'+p.nome+'</h3><p>'+p.desc+'</p><button onclick="addToCart(\''+p.nome+'\','+p.preco+')">Adicionar R$'+p.preco+'</button></div>';
+  container.appendChild(div);
+}
 
-  <!-- ÁUDIO -->
-  <audio id="somPagamento" src="img-loja/som123.mp3" preload="auto"></audio>
+function playSound(){
+  var som = document.getElementById('somPagamento');
+  som.play();
+}
 
-  <script>
-    const produtos = [
-      {nome: "Cabo carregador", preco: 15, desc: "Cabo de carregador disponível nos modelos: Tipo C e Lightning (IPhone). Uma ponta USB, outra ponta carregador. Não acompanha fonte.", img: "img-loja/Foto1.jpg"},
-      {nome: "Fone de Ouvido Bluetooth", preco: 20, desc: "Fone de ouvido sem fio com cancelamento de ruído e microfone intra-auricular. Autonomia de até 4 horas. Acompanha: Par de fones + Caixa de carregamento + cabo USB + manual.", img: "img-loja/Foto2.jpg"},
-      {nome: "Guarda-Chuva", preco: 35, desc: "Guarda-chuva compacto e reforçado, cabe em sua bolsa. (cores conforme disponibilidade)", img: "img-loja/Foto3.jpg"},
-      {nome: "Power Bank (Carregador portátil)", preco: 40, desc: "Carregador Portátil Power Bank 10000mah com 3 Saídas: Tipo C, Lightning e Micro USB.", img: "img-loja/Foto4.jpg"},
-      {nome: "Kit Fonte + Cabo Carregador", preco: 25, desc: "Kit Carregador completo 1.2A, incluso fonte + cabo de carregamento. Disponível para Tipo C e Lightning (IPhone).", img: "img-loja/Foto5.jpg"},
-      {nome: "Cabo carregador USB 3 em 1", preco: 20, desc: "Cabo 3 em 1 com conectores: Tipo-C, Lightning e Micro USB, permitindo carregar diversos dispositivos com um único cabo.", img: "img-loja/Foto6.jpg"},
-      {nome: "Fone com microfone", preco: 10, desc: "Fone com fio e microfone, entrada P2.", img: "img-loja/Foto7.jpg"}
-    ];
+function addToCart(nome, preco){
+  if(cart[nome]) cart[nome].qtd++;
+  else cart[nome]={price:preco,qtd:1};
+  renderCart();
+}
 
-    const lista = document.getElementById("listaProdutos");
-    const cart = {};
+function removeFromCart(nome){
+  if(cart[nome]){
+    cart[nome].qtd--;
+    if(cart[nome].qtd<=0) delete cart[nome];
+  }
+  renderCart();
+}
 
-    produtos.forEach((p) => {
-      const div = document.createElement("div");
-      div.className = "produto";
-      div.innerHTML = `
-        <img src="${p.img}" alt="${p.nome}" />
-        <div class="produto-info">
-          <h3>${p.nome}</h3>
-          <p>${p.desc}</p>
-          <button onclick="addToCart('${p.nome}', ${p.preco}, event)">Adicionar - R$${p.preco}</button>
-        </div>
-      `;
-      lista.appendChild(div);
-    });
+function renderCart(){
+  var ul = document.getElementById('itensCarrinho');
+  ul.innerHTML='';
+  var total=0;
+  for(var p in cart){
+    var li = document.createElement('li');
+    li.innerHTML = p+' x'+cart[p].qtd+' - R$'+(cart[p].price*cart[p].qtd)+' <button class="remover" onclick="removeFromCart(\''+p+'\')">X</button>';
+    ul.appendChild(li);
+    total+=cart[p].price*cart[p].qtd;
+  }
+  document.getElementById('total').innerText=total.toFixed(2);
+}
 
-    function addToCart(nome, preco, e){
-      e.stopPropagation();
-      if(cart[nome]) cart[nome].qtd++;
-      else cart[nome] = {price: preco, qtd:1};
-      renderCart();
-    }
+document.getElementById('finalizar').onclick=function(){
+  if(Object.keys(cart).length==0){ alert("Carrinho vazio!"); return; }
+  document.getElementById('pagamento').style.display='block';
+};
 
-    function removeFromCart(nome){
-      if(cart[nome]){
-        cart[nome].qtd--;
-        if(cart[nome].qtd<=0) delete cart[nome];
-      }
-      renderCart();
-    }
+function copyPix(){
+  var pix = document.getElementById('pixKey').innerText;
+  var el = document.createElement('textarea'); el.value=pix; document.body.appendChild(el); el.select();
+  document.execCommand('copy'); document.body.removeChild(el);
+  playSound(); // toca som
+  alert("Chave Pix copiada!");
+}
 
-    function renderCart(){
-      const ul = document.getElementById("itensCarrinho");
-      ul.innerHTML = "";
-      let total = 0;
-      for(let p in cart){
-        const subtotal = cart[p].price * cart[p].qtd;
-        const li = document.createElement("li");
-        li.innerHTML = `${p} x${cart[p].qtd} - R$${subtotal} <button class="remover" onclick="removeFromCart('${p}')">X</button>`;
-        ul.appendChild(li);
-        total += subtotal;
-      }
-      document.getElementById("total").innerText = total.toFixed(2);
-      document.getElementById("resumoTotal").innerText = total.toFixed(2);
-    }
+function confirmPayment(){
+  playSound(); // toca som
+  var msg="🛒 Pedido Loja Express:%0A";
+  var total=0;
+  for(var p in cart){
+    msg+=p+' x'+cart[p].qtd+' - R$'+(cart[p].price*cart[p].qtd)+'%0A';
+    total+=cart[p].price*cart[p].qtd;
+  }
+  msg+='Total: R$'+total;
+  window.open('https://wa.me/5511970424524?text='+msg,'_blank');
+  cart={};
+  renderCart();
+  document.getElementById('pagamento').style.display='none';
+}
+</script>
 
-    function playSound(){
-      const som = document.getElementById('somPagamento');
-      som.currentTime = 0;
-      som.play();
-    }
-
-    document.getElementById('finalizar').onclick = function(){
-      if(Object.keys(cart).length===0){ alert("Carrinho vazio!"); return; }
-      document.getElementById('pagamento').style.display = 'block';
-      playSound(); // som ao finalizar compra
-    };
-
-    function copyPix(){
-      const pixNumber = document.getElementById("pixKey").innerText;
-      const el = document.createElement("textarea");
-      el.value = pixNumber;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-      playSound(); // som ao copiar Pix
-      alert("Chave Pix copiada!");
-    }
-
-    function confirmPayment(){
-      let msg = "🛒 Pedido Loja Express:%0A";
-      let total=0;
-      for(let p in cart){
-        const subtotal = cart[p].price*cart[p].qtd;
-        msg+=`${p} x${cart[p].qtd} - R$${subtotal}%0A`;
-        total+=subtotal;
-      }
-      msg+=`Total: R$${total}`;
-      window.open(`https://wa.me/5511970424524?text=${msg}`,"_blank");
-      for(let key in cart) delete cart[key];
-      renderCart();
-      document.getElementById("pagamento").style.display = "none";
-      playSound(); // som ao clicar já paguei
-    }
-  </script>
 </body>
 </html>
