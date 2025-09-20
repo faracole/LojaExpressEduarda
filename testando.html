@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loja Express</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fff8e7; margin: 0; padding: 0; }
+    header { background: #ffcc00; color: #4b0082; padding: 1rem; text-align: center; font-size: 1.5rem; font-weight: bold; }
+
+    /* PRODUTOS */
+    .produtos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; padding: 0.8rem; }
+    .produto {
+      background: #fff; border: 2px solid #4b0082; border-radius: 10px; padding: 0.8rem; text-align: center;
+      display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; transition: all 0.3s ease;
+    }
+    .produto img { width: 100%; max-width: 140px; height: 140px; object-fit: contain; cursor: pointer; margin: 0 auto; }
+    .produto h3 { margin: 0.5rem 0; color: #4b0082; cursor: pointer; font-size: 1rem; }
+    .produto p { font-size: 0.85rem; color: #333; display: none; margin-top: 0.5rem; }
+    .produto button { background: #4b0082; color: #fff; border: none; padding: 0.5rem 0.8rem; border-radius: 5px; cursor: pointer; font-size: 0.9rem; margin-top: 0.5rem; }
+    .produto button:hover { background: #36005d; }
+
+    /* CARRINHO */
+    #carrinho { background: #eee; padding: 1rem; border-top: 3px solid #4b0082; margin-top: 0.5rem; }
+    #itensCarrinho { list-style: none; padding: 0; margin: 0; }
+    #itensCarrinho li { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 0.4rem 0.5rem; margin: 0.2rem 0; border: 1px solid #ccc; border-radius: 5px; font-size: 0.9rem; }
+    .remover { background: red; color: #fff; border: none; border-radius: 5px; padding: 0.2rem 0.5rem; cursor: pointer; font-size: 0.8rem; }
+    #finalizar { margin-top: 0.8rem; background: #ffcc00; color: #4b0082; border: none; padding: 0.6rem 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1rem; }
+
+    /* PAGAMENTO */
+    #pagamento { display: none; padding: 1rem; background: #f7e7ff; border-top: 3px solid #4b0082; margin-top: 0.5rem; text-align: center; border-radius: 10px; }
+    #pixInfo { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; font-size: 1rem; }
+    #pixKey { border: 1px solid #4b0082; padding: 6px 10px; border-radius: 6px; font-weight: 500; }
+    #pixPanel button { padding: 0.5rem 1rem; border-radius: 6px; border: none; background: #4b0082; color: #fff; cursor: pointer; }
+    #pixPanel button:hover { background: #36005d; }
+    #qrCodePlaceholder img { width: 150px; height: 150px; border-radius: 10px; }
+
+    /* RESPONSIVIDADE */
+    @media (max-width: 600px) {
+      .produtos { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; padding: 0.5rem; }
+      .produto img { height: 130px; }
+    }
+  </style>
+</head>
+<body>
+  <header>🛒 Loja Express</header>
+
+  <section class="produtos" id="listaProdutos"></section>
+
+  <section id="carrinho">
+    <h2>🛒 Carrinho</h2>
+    <ul id="itensCarrinho"></ul>
+    <p><strong>Total: R$ <span id="total">0.00</span></strong></p>
+    <button id="finalizar">Finalizar Compra</button>
+  </section>
+
+  <section id="pagamento">
+    <h2>💳 Pagamento via Pix</h2>
+    <div id="pixInfo">
+      <span id="pixKey">11972500459</span>
+      <button onclick="copyPix()">Copiar</button>
+    </div>
+    <div id="qrCodePlaceholder">
+      <img src="img-loja/QRcode.png" alt="QR Code Pix">
+    </div>
+    <button onclick="confirmPayment()">Já paguei</button>
+  </section>
+
+  <script>
+    const produtos = [
+      {nome: "Carregador", preco: 15, desc: "Carregador rápido USB.", img: "img-loja/Foto1.jpg"},
+      {nome: "Fone de Ouvido", preco: 20, desc: "Fone estéreo com ótima qualidade de som.", img: "img-loja/Foto2.jpg"},
+      {nome: "Guarda-Chuva", preco: 40, desc: "Guarda-chuva resistente ao vento.", img: "img-loja/Foto3.jpg"},
+      {nome: "Cabo USB", preco: 10, desc: "Cabo USB de 1 metro para carregamento.", img: "img-loja/Foto4.jpg"},
+      {nome: "Power Bank", preco: 60, desc: "Bateria portátil 10.000mAh.", img: "img-loja/Foto5.jpg"},
+      {nome: "Suporte de Celular", preco: 25, desc: "Suporte veicular ajustável.", img: "img-loja/Foto6.jpg"}
+    ];
+
+    const lista = document.getElementById("listaProdutos");
+    const cart = {};
+
+    produtos.forEach((p) => {
+      const div = document.createElement("div");
+      div.className = "produto";
+      div.innerHTML = `
+        <img src="${p.img}" alt="${p.nome}" onclick="toggleDescription(this)" />
+        <h3 onclick="toggleDescription(this)">${p.nome}</h3>
+        <p>${p.desc}</p>
+        <button onclick="addToCart('${p.nome}', ${p.preco}, event)">Adicionar - R$${p.preco}</button>
+      `;
+      lista.appendChild(div);
+    });
+
+    function toggleDescription(el){
+      const p = el.closest(".produto").querySelector("p");
+      p.style.display = (p.style.display === "block") ? "none" : "block";
+    }
+
+    function addToCart(nome, preco, e){
+      e.stopPropagation();
+      if(cart[nome]) cart[nome].qtd++;
+      else cart[nome] = {price: preco, qtd:1};
+      renderCart();
+    }
+
+    function removeFromCart(nome){
+      if(cart[nome]){
+        cart[nome].qtd--;
+        if(cart[nome].qtd<=0) delete cart[nome];
+      }
+      renderCart();
+    }
+
+    function renderCart(){
+      const ul = document.getElementById("itensCarrinho");
+      ul.innerHTML = "";
+      let total = 0;
+      for(let p in cart){
+        const subtotal = cart[p].price * cart[p].qtd;
+        const li = document.createElement("li");
+        li.innerHTML = `${p} x${cart[p].qtd} - R$${subtotal} <button class="remover" onclick="removeFromCart('${p}')">X</button>`;
+        ul.appendChild(li);
+        total += subtotal;
+      }
+      document.getElementById("total").innerText = total.toFixed(2);
+    }
+
+    document.getElementById("finalizar").addEventListener("click", ()=>{
+      if(Object.keys(cart).length===0){ alert("Seu carrinho está vazio!"); return; }
+      document.getElementById("pagamento").style.display = "block";
+      window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+    });
+
+    function copyPix(){
+      const pixNumber = document.getElementById("pixKey").innerText;
+      const el = document.createElement("textarea");
+      el.value = pixNumber;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+    }
+
+    function confirmPayment(){
+      let msg = "🛒 Pedido Loja Express:%0A";
+      let total=0;
+      for(let p in cart){
+        const subtotal = cart[p].price*cart[p].qtd;
+        msg+=`${p} x${cart[p].qtd} - R$${subtotal}%0A`;
+        total+=subtotal;
+      }
+      msg+=`Total: R$${total}`;
+      window.open(`https://wa.me/5511972500459?text=${msg}`,"_blank");
+      for(let key in cart) delete cart[key];
+      renderCart();
+      document.getElementById("pagamento").style.display = "none";
+    }
+  </script>
+</body>
+</html>
